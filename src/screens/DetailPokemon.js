@@ -20,7 +20,8 @@ var width = Dimensions.get("window").width; //full width
 var height = Dimensions.get("window").height; //full height
 import { Ionicons } from "@expo/vector-icons";
 import ModalMoreEvo from "./ModalMoreEvo";
-const idd = 9;
+import { fn_findEvo } from "./fn_findEvo";
+const idd = 550;
 {
   /* <Ionicons name="thumbs-up" style={myStyles.iconCircle} /> */
 }
@@ -82,33 +83,12 @@ const DetailPokemon = () => {
     return data[0].base_stat;
   };
 
-  const fn_findEvo = (dataPokemon) => {
-    var evoChain = [];
-    var evoData = dataPokemon.chain;
-
-    do {
-      var evoDetails = evoData["evolution_details"][0];
-
-      evoChain.push({
-        species_name: evoData.species.name,
-        id: evoData.species.url.split("/")[6],
-        min_level: !evoDetails ? 1 : evoDetails.min_level,
-        trigger_name: !evoDetails ? null : evoDetails.trigger.name,
-        item: !evoDetails ? null : evoDetails.item,
-      });
-
-      evoData = evoData["evolves_to"][0];
-    } while (!!evoData && evoData.hasOwnProperty("evolves_to"));
-    return evoChain;
-  };
-
   return (
     <LinearGradient
       colors={["#fff", "#f5f5f5", "#f5f5f5", colorBgPokemon]}
       style={myStyles.viewContainer}
     >
-      {evolutionSpecie && console.log(evolutionSpecie)}
-      {dataPokemon ? (
+      {dataPokemon && dataSpecie ? (
         <ScrollView>
           <View style={myStyles.viewContent}>
             <View
@@ -332,16 +312,14 @@ const DetailPokemon = () => {
                         display: "flex",
                         flexDirection: "row",
                         width: 395,
-                        backgroundColor: "red",
                         marginRight: 10,
                         marginLeft: 8,
                         paddingVertical: 10,
                         paddingHorizontal: 15,
                         borderRadius: 10,
-                        // backgroundColor: "rgba(78, 76, 76, 0.681)",
                         justifyContent: "space-around",
                         marginTop: 8,
-                        marginBottom: 15,
+                        marginBottom: 25,
                         shadowColor: "#000",
                         shadowOffset: {
                           width: 0,
@@ -454,7 +432,7 @@ const DetailPokemon = () => {
               >
                 <View style={{ display: "flex", alignItems: "center" }}>
                   <Image
-                    style={{ width: 160, height: 160, opacity: 0.5, top: -25 }}
+                    style={{ width: 160, height: 160, opacity: 0.5, top: -10 }}
                     source={{
                       uri:
                         "https://cdn.iconscout.com/icon/free/png-256/pokemon-go-2288554-1933799.png",
@@ -469,10 +447,10 @@ const DetailPokemon = () => {
                         colorBgPokemon == "white" ||
                         colorBgPokemon == "orange" ||
                         colorBgPokemon == "gold"
-                          ? "#000"
+                          ? "rgba(0,0,0,0.4)"
                           : "#fff"
                       }`,
-                      top: -50,
+                      top: -35,
                     }}
                   >
                     NO EVOLUTIONs specie
@@ -490,8 +468,33 @@ const DetailPokemon = () => {
           </View>
         </ScrollView>
       ) : (
-        <View>
-          <Text>loading</Text>
+        <View
+          style={{
+            flex: 1,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "#fff",
+          }}
+        >
+          <Image
+            style={{ width: 120, height: 120 }}
+            source={{
+              uri:
+                "https://cdn.dribbble.com/users/217998/screenshots/2446541/pokemon-rewind.gif",
+            }}
+          ></Image>
+          <Text
+            style={{
+              marginTop: 15,
+              fontSize: 15,
+              top: -15,
+              fontWeight: "bold",
+              color: "red",
+            }}
+          >
+            ...POKEMON loading...
+          </Text>
         </View>
       )}
     </LinearGradient>
