@@ -7,17 +7,20 @@ import login from "./src/screens/LoginScreen";
 import Register from "./src/screens/Register";
 import Menu from "./src/screens/Menu";
 import Random from "./src/screens/Random";
+import DetailPokemon from "./src/screens/DetailPokemon";
 
 const Stack = createStackNavigator();
 function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="random">
+      <Stack.Navigator initialRouteName="login">
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="login" component={login} />
         <Stack.Screen name="register" component={Register} />
         <Stack.Screen name="menu" component={Menu} />
         <Stack.Screen name="random" component={Random} />
+        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="Pokemon" component={DetailPokemon}></Stack.Screen>
       </Stack.Navigator>
     </NavigationContainer>
   );
