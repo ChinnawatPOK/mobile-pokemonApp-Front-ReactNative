@@ -28,18 +28,24 @@ const LoginScreen = (props) => {
 
   useEffect(() => {
     if (loginRes && loginRes.status == 200) {
-      _storeData("pok");
+      _storeData(loginRes.data.username);
       console.log("logedin");
+      navigation.navigate("menu");
     } else if (loginRes && loginRes.status == 400) console.log("400");
     else console.log("500");
   }, [loginRes]);
 
   const checkLogin = async (username, password) => {
-    await login(username, password, setLoginRes, setLoginErr);
+    if (username && password) {
+      await login(username, password, setLoginRes, setLoginErr);
+      setUsername("");
+      setPassword("");
+    } else Alert.alert("please type");
   };
 
   const _storeData = async (userId) => {
     try {
+      console.log(userId);
       await AsyncStorage.setItem("user", userId);
     } catch (error) {
       // Error saving data
@@ -62,6 +68,7 @@ const LoginScreen = (props) => {
           <TextInput
             style={myStyle.inputStyle}
             placeholder="username"
+            value={username}
             onChangeText={(e) => setUsername(e)}
             // onEndEditing={() => console.log(textInput)}
           />
@@ -70,6 +77,7 @@ const LoginScreen = (props) => {
           <TextInput
             style={myStyle.inputStyle}
             placeholder="password"
+            value={password}
             onChangeText={(e) => setPassword(e)}
             // onEndEditing={() => console.log(textInput)}
           />

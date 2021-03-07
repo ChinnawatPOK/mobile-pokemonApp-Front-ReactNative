@@ -42,7 +42,7 @@ export default () => {
         setRegisRes(res);
       })
       .catch((error) => {
-        if (error.response.status === 400) setLoginRes(error.response);
+        if (error.response.status === 400) setRegisRes(error.response);
         console.log("error regis");
       });
   };

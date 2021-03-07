@@ -1,23 +1,45 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, AsyncStorage } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { Input } from "react-native-elements";
 import GradientButton from "react-native-gradient-buttons";
 import responseApi from "../hookApi/responseAPi";
+import { useNavigation } from "@react-navigation/native";
 
 const Register = () => {
   const [registerApi] = responseApi();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [regisRes, setRegisRes] = useState(null);
+  const [userId, setUserId] = useState("");
+  const navigation = useNavigation();
   useEffect(() => {
+    readDataFromStorage();
     if (regisRes && regisRes.status == 200) console.log("regis200");
     else if (regisRes && regisRes.status == 400) console.log("regis400");
   }, [regisRes]);
 
+  const readDataFromStorage = async () => {
+    try {
+      const user = await AsyncStorage.getItem("user");
+      if (user !== null) {
+        console.log(user);
+        setUserId(user);
+      }
+    } catch (e) {
+      alert("Failed to fetch the data from storage");
+    }
+  };
+  const clearStorage = async () => {
+    try {
+      await AsyncStorage.removeItem("user");
+      alert("Storage successfully cleared!");
+    } catch (e) {
+      alert("Failed to clear the async storage.");
+    }
+  };
   const registerAction = (usernameReq, passwordReq) => {
-    console.log(usernameReq);
-    console.log(passwordReq);
+    clearStorage();
     registerApi(usernameReq, passwordReq, setRegisRes);
   };
   return (
