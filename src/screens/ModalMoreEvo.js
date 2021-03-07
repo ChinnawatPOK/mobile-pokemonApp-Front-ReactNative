@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { LinearGradient } from "expo-linear-gradient";
 import {
   View,
   Text,
@@ -10,7 +11,7 @@ import {
   Modal,
   Pressable,
   TouchableOpacity,
-  Animated,
+  // Animated,
 } from "react-native";
 import { Divider } from "react-native-elements";
 
@@ -18,14 +19,14 @@ var width = Dimensions.get("window").width; //full width
 var height = Dimensions.get("window").height; //full height
 
 const ModalMoreEvo = (props) => {
-  const fadeAnim = useRef(new Animated.Value(0)).current;
+  // const fadeAnim = useRef(new Animated.Value(0)).current;
 
-  useEffect(() => {
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 10000,
-    }).start();
-  }, [fadeAnim]);
+  // useEffect(() => {
+  //   Animated.timing(fadeAnim, {
+  //     toValue: 1,
+  //     duration: 10000,
+  //   }).start();
+  // }, [fadeAnim]);
   return (
     <Modal
       animationType={"fade"}
@@ -49,24 +50,25 @@ const ModalMoreEvo = (props) => {
         >
           <View style={{ width: width, height: height }}></View>
         </TouchableOpacity>
-        <View
+        <LinearGradient
+          colors={["#403B4A", "#E7E9BB"]}
           style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             height: 400,
-            backgroundColor: "green",
+            // backgroundColor: "green",
             borderTopRightRadius: 30,
             borderTopLeftRadius: 30,
             padding: 15,
           }}
         >
-          <Animated.View>
+          <View>
             <Image
-              source={{ uri: props.data }}
+              source={{ uri: props.data.image }}
               style={{ width: 200, height: 200 }}
             ></Image>
-          </Animated.View>
+          </View>
 
           <Text
             style={{
@@ -76,9 +78,19 @@ const ModalMoreEvo = (props) => {
               color: "#fff",
             }}
           >
-            Busarem
+            {props.data.name}
           </Text>
-        </View>
+          <Text
+            style={{
+              fontSize: 25,
+              letterSpacing: 1,
+              fontWeight: "bold",
+              color: "gray",
+            }}
+          >
+            LEVEL UPGRADE {props.data.level}
+          </Text>
+        </LinearGradient>
       </View>
     </Modal>
   );

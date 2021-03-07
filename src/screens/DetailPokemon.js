@@ -9,6 +9,7 @@ import {
   FlatList,
   Modal,
   Pressable,
+  Alert,
   TouchableOpacity,
 } from "react-native";
 import axios from "axios";
@@ -19,12 +20,15 @@ var width = Dimensions.get("window").width; //full width
 var height = Dimensions.get("window").height; //full height
 import { Ionicons } from "@expo/vector-icons";
 import ModalMoreEvo from "./ModalMoreEvo";
+const idd = 9;
 {
   /* <Ionicons name="thumbs-up" style={myStyles.iconCircle} /> */
 }
 const DetailPokemon = () => {
-  const [evoId, setevoId] = useState(null);
+  const [urlEvo, seturlEvo] = useState(null);
+  const [evolutionSpecie, setevolutionSpecie] = useState(null);
   const [dataSpecie, setdataSpecie] = useState(null);
+  const [dataEvo, setdataEvo] = useState(null);
   const [dataPokemon, setdataPokemon] = useState(null);
   const [colorBgPokemon, setcolorBgPokemon] = useState("red");
   const [modalVisible, setModalVisible] = useState(false);
@@ -33,18 +37,18 @@ const DetailPokemon = () => {
 
   useEffect(() => {
     axios
-      .get(`https://pokeapi.co/api/v2/pokemon-species/${1}`)
+      .get(`https://pokeapi.co/api/v2/pokemon-species/${idd}`)
       .then((res) => {
         setdataSpecie(res.data);
-        // setevoId(res.data.evolution_chain.url);
-        // setevoId(res.data.evolution_chain)
+        seturlEvo(res.data.evolution_chain.url);
+        callDataEvo(res.data.evolution_chain.url);
         setcolorBgPokemon(res.data.color.name);
       })
       .catch((err) => {
         console.log(err);
       });
     axios
-      .get(`https://pokeapi.co/api/v2/pokemon/${1}`)
+      .get(`https://pokeapi.co/api/v2/pokemon/${idd}`)
       .then((res) => {
         setdataPokemon(res.data);
       })
@@ -52,6 +56,19 @@ const DetailPokemon = () => {
         console.log(err);
       });
   }, []);
+
+  const callDataEvo = async (url) => {
+    // Alert.alert(id);
+    await axios
+      .get(`${url}`)
+      .then((res) => {
+        setevolutionSpecie(fn_findEvo(res.data));
+        setdataEvo(res.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
 
   const closeModal = () => {
     setisOpenModal(false);
@@ -61,8 +78,28 @@ const DetailPokemon = () => {
     const data = dataPokemon.stats.filter((item, index) => {
       return item.stat.name == typee;
     });
-    console.log(data);
+    // console.log(data);
     return data[0].base_stat;
+  };
+
+  const fn_findEvo = (dataPokemon) => {
+    var evoChain = [];
+    var evoData = dataPokemon.chain;
+
+    do {
+      var evoDetails = evoData["evolution_details"][0];
+
+      evoChain.push({
+        species_name: evoData.species.name,
+        id: evoData.species.url.split("/")[6],
+        min_level: !evoDetails ? 1 : evoDetails.min_level,
+        trigger_name: !evoDetails ? null : evoDetails.trigger.name,
+        item: !evoDetails ? null : evoDetails.item,
+      });
+
+      evoData = evoData["evolves_to"][0];
+    } while (!!evoData && evoData.hasOwnProperty("evolves_to"));
+    return evoChain;
   };
 
   return (
@@ -70,7 +107,7 @@ const DetailPokemon = () => {
       colors={["#fff", "#f5f5f5", "#f5f5f5", colorBgPokemon]}
       style={myStyles.viewContainer}
     >
-      {console.log(colorBgPokemon)}
+      {evolutionSpecie && console.log(evolutionSpecie)}
       {dataPokemon ? (
         <ScrollView>
           <View style={myStyles.viewContent}>
@@ -82,7 +119,6 @@ const DetailPokemon = () => {
                 paddingHorizontal: 20,
               }}
             >
-              <Text>{evoId && evoId}</Text>
               <View>
                 <Text style={myStyles.namePokemon}>Busalem</Text>
                 <View
@@ -134,7 +170,7 @@ const DetailPokemon = () => {
             </View>
             <Image
               source={{
-                uri: "https://pokeres.bastionbot.org/images/pokemon/1.png",
+                uri: `https://pokeres.bastionbot.org/images/pokemon/${idd}.png`,
               }}
               style={myStyles.imgPokemon}
             ></Image>
@@ -280,122 +316,170 @@ const DetailPokemon = () => {
                 marginTop: 8,
               }}
             >
-              Evolutions 3
+              Evolutions {evolutionSpecie && evolutionSpecie.length} SPECIES
             </Text>
-            <FlatList
-              horizontal={true}
-              showsHorizontalScrollIndicator={false}
-              data={[
-                "https://pokeres.bastionbot.org/images/pokemon/1.png",
-                "https://pokeres.bastionbot.org/images/pokemon/2.png",
-                "https://pokeres.bastionbot.org/images/pokemon/3.png",
-              ]}
-              keyExtractor={(result) => result}
-              renderItem={({ item }) => {
-                return (
-                  <LinearGradient
-                    colors={["#fff", colorBgPokemon]}
-                    style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      width: 395,
-                      backgroundColor: "red",
-                      marginRight: 10,
-                      marginLeft: 8,
-                      paddingVertical: 10,
-                      paddingHorizontal: 15,
-                      borderRadius: 10,
-                      // backgroundColor: "rgba(78, 76, 76, 0.681)",
-                      justifyContent: "space-around",
-                      marginTop: 8,
-                      marginBottom: 15,
-                      shadowColor: "#000",
-                      shadowOffset: {
-                        width: 0,
-                        height: 3,
-                      },
-                      shadowOpacity: 0.29,
-                      shadowRadius: 4.65,
+            {evolutionSpecie && evolutionSpecie.length != 1 ? (
+              <FlatList
+                horizontal={true}
+                showsHorizontalScrollIndicator={false}
+                data={evolutionSpecie}
+                keyExtractor={(result) => result.id}
+                renderItem={({ item, index }) => {
+                  return (
+                    <LinearGradient
+                      colors={["#fff", colorBgPokemon]}
+                      style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        width: 395,
+                        backgroundColor: "red",
+                        marginRight: 10,
+                        marginLeft: 8,
+                        paddingVertical: 10,
+                        paddingHorizontal: 15,
+                        borderRadius: 10,
+                        // backgroundColor: "rgba(78, 76, 76, 0.681)",
+                        justifyContent: "space-around",
+                        marginTop: 8,
+                        marginBottom: 15,
+                        shadowColor: "#000",
+                        shadowOffset: {
+                          width: 0,
+                          height: 3,
+                        },
+                        shadowOpacity: 0.29,
+                        shadowRadius: 4.65,
 
-                      elevation: 7,
-                    }}
-                  >
-                    <Image
-                      source={{
-                        uri: item,
+                        elevation: 7,
                       }}
-                      style={{ width: 95, height: 95, borderRadius: 80 }}
-                    ></Image>
-                    <View style={{ display: "flex", justifyContent: "center" }}>
-                      {isOpenModal && selectedPokemon && (
-                        <ModalMoreEvo
-                          fn_close={closeModal}
-                          data={selectedPokemon}
-                        />
-                      )}
-                      <Text
-                        style={{
-                          fontSize: 28,
-                          fontWeight: "bold",
-                          color: `${
-                            colorBgPokemon == "yellow" ||
-                            colorBgPokemon == "white"
-                              ? "#888a8bb4"
-                              : "#fff"
-                          }`,
+                    >
+                      <Image
+                        source={{
+                          uri: `https://pokeres.bastionbot.org/images/pokemon/${item.id}.png`,
                         }}
+                        style={{ width: 95, height: 95 }}
+                      ></Image>
+                      <View
+                        style={{ display: "flex", justifyContent: "center" }}
                       >
-                        BUSALAM
-                      </Text>
-                      <Text
-                        style={{
-                          fontSize: 20,
-                          color: `${
-                            colorBgPokemon == "yellow" ||
-                            colorBgPokemon == "white"
-                              ? "#888a8bb4"
-                              : "#e4e6e5"
-                          }`,
-                          letterSpacing: 1,
-                        }}
-                      >
-                        Lv.1 upgrade
-                      </Text>
-                      <TouchableOpacity
-                        onPress={() => {
-                          setselectedPokemon(item);
-                          setisOpenModal(true);
-                        }}
-                      >
-                        <View
+                        {isOpenModal && selectedPokemon && (
+                          <ModalMoreEvo
+                            fn_close={closeModal}
+                            data={selectedPokemon}
+                          />
+                        )}
+                        <Text
                           style={{
-                            display: "flex",
-                            flexDirection: "row",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            backgroundColor: "rgb(56, 55, 55)",
-                            paddingHorizontal: 25,
-                            paddingVertical: 5,
-                            borderRadius: 35,
-                            marginTop: 6,
+                            fontSize: 28,
+                            fontWeight: "bold",
+                            color: `${
+                              colorBgPokemon == "yellow" ||
+                              colorBgPokemon == "white" ||
+                              colorBgPokemon == "orange" ||
+                              colorBgPokemon == "gold"
+                                ? "#888a8bb4"
+                                : "#fff"
+                            }`,
                           }}
                         >
-                          <Text
+                          {item.species_name.toUpperCase()}
+                        </Text>
+                        <Text
+                          style={{
+                            fontSize: 20,
+
+                            color: `${
+                              colorBgPokemon == "yellow" ||
+                              colorBgPokemon == "white" ||
+                              colorBgPokemon == "orange" ||
+                              colorBgPokemon == "gold"
+                                ? "#888a8bb4"
+                                : "#e4e6e5"
+                            }`,
+                            letterSpacing: 1,
+                          }}
+                        >
+                          SPECIE {index + 1}
+                        </Text>
+                        <TouchableOpacity
+                          onPress={() => {
+                            setselectedPokemon({
+                              name: item.species_name,
+                              image: `https://pokeres.bastionbot.org/images/pokemon/${item.id}.png`,
+                              level: item.min_level,
+                            });
+                            setisOpenModal(true);
+                          }}
+                        >
+                          <View
                             style={{
-                              fontSize: 15,
-                              color: "#fff",
-                              fontWeight: "bold",
+                              display: "flex",
+                              flexDirection: "row",
+                              justifyContent: "center",
+                              alignItems: "center",
+                              backgroundColor: "rgb(56, 55, 55)",
+                              paddingHorizontal: 25,
+                              paddingVertical: 5,
+                              borderRadius: 35,
+                              marginTop: 6,
+                              // marginBottom: 20,
                             }}
                           >
-                            more detail
-                          </Text>
-                        </View>
-                      </TouchableOpacity>
-                    </View>
-                  </LinearGradient>
-                );
-              }}
-            />
+                            <Text
+                              style={{
+                                fontSize: 15,
+                                color: "#fff",
+                                fontWeight: "bold",
+                              }}
+                            >
+                              more detail
+                            </Text>
+                          </View>
+                        </TouchableOpacity>
+                      </View>
+                    </LinearGradient>
+                  );
+                }}
+              />
+            ) : (
+              <View
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  paddingHorizontal: 15,
+                  borderRadius: 10,
+                  marginBottom: 15,
+                }}
+              >
+                <View style={{ display: "flex", alignItems: "center" }}>
+                  <Image
+                    style={{ width: 160, height: 160, opacity: 0.5, top: -25 }}
+                    source={{
+                      uri:
+                        "https://cdn.iconscout.com/icon/free/png-256/pokemon-go-2288554-1933799.png",
+                    }}
+                  ></Image>
+                  <Text
+                    style={{
+                      fontSize: 15,
+                      fontWeight: "bold",
+                      color: `${
+                        colorBgPokemon == "yellow" ||
+                        colorBgPokemon == "white" ||
+                        colorBgPokemon == "orange" ||
+                        colorBgPokemon == "gold"
+                          ? "#000"
+                          : "#fff"
+                      }`,
+                      top: -50,
+                    }}
+                  >
+                    NO EVOLUTIONs specie
+                  </Text>
+                </View>
+              </View>
+            )}
             {/* <Image
             source={{
               uri: "https://pokeres.bastionbot.org/images/pokemon/2.png",
