@@ -21,11 +21,11 @@ var height = Dimensions.get("window").height; //full height
 import { Ionicons } from "@expo/vector-icons";
 import ModalMoreEvo from "./ModalMoreEvo";
 import { fn_findEvo } from "./fn_findEvo";
-const idd = 550;
+// const idd = 550;
 {
   /* <Ionicons name="thumbs-up" style={myStyles.iconCircle} /> */
 }
-const DetailPokemon = () => {
+const DetailPokemon = ({ route }) => {
   const [urlEvo, seturlEvo] = useState(null);
   const [evolutionSpecie, setevolutionSpecie] = useState(null);
   const [dataSpecie, setdataSpecie] = useState(null);
@@ -35,6 +35,7 @@ const DetailPokemon = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [isOpenModal, setisOpenModal] = useState(false);
   const [selectedPokemon, setselectedPokemon] = useState(null);
+  const { idd } = route.params;
 
   useEffect(() => {
     axios

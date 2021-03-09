@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import responseApi from "../hookApi/responseAPi";
 import GradientButton from "react-native-gradient-buttons";
+import axios from "axios";
 // import { AsyncStorage } from "@react-native-community/async-storage";
 import { useNavigation } from "@react-navigation/native";
 var width = Dimensions.get("window").width; //full width
@@ -26,27 +27,28 @@ const LoginScreen = (props) => {
   const [loginErr, setLoginErr] = useState(null);
   const navigation = useNavigation();
 
-  useEffect(() => {
-    if (loginRes && loginRes.status == 200) {
-      _storeData(loginRes.data.username);
-      console.log("logedin");
-      navigation.navigate("menu");
-    } else if (loginRes && loginRes.status == 400) console.log("400");
-    else console.log("500");
-  }, [loginRes]);
-
-  const checkLogin = async (username, password) => {
-    if (username && password) {
-      await login(username, password, setLoginRes, setLoginErr);
-      setUsername("");
-      setPassword("");
-    } else Alert.alert("please type");
+  const checkLogin = (username, password) => {
+    axios
+      .post(`http://10.0.2.2:8080/api/login`, {
+        username: username,
+        password: password,
+      })
+      .then((res) => {
+        console.log(res.data);
+        _storeData(res.data);
+        setLoginRes(res);
+        navigation.navigate("menu");
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   const _storeData = async (userId) => {
     try {
-      console.log(userId);
-      await AsyncStorage.setItem("user", userId);
+      console.log(userId.username);
+      await AsyncStorage.setItem("id", userId.userId + "");
+      await AsyncStorage.setItem("name", userId.username);
     } catch (error) {
       // Error saving data
       console.log(error);
@@ -64,22 +66,34 @@ const LoginScreen = (props) => {
           source={require(`../images/pokeball.png`)}
           style={myStyle.imageBallStyle}
         />
+        <Text
+          style={{
+            alignSelf: "flex-start",
+            marginHorizontal: 50,
+            fontSize: 32,
+            fontWeight: "bold",
+            marginBottom: 10,
+            color: "white",
+          }}
+        >
+          Sign In
+        </Text>
         <View style={myStyle.textInputStyle}>
           <TextInput
             style={myStyle.inputStyle}
             placeholder="username"
             value={username}
             onChangeText={(e) => setUsername(e)}
-            // onEndEditing={() => console.log(textInput)}
           />
         </View>
+
         <View style={myStyle.textInputStyle}>
           <TextInput
             style={myStyle.inputStyle}
+            secureTextEntry={true}
             placeholder="password"
             value={password}
             onChangeText={(e) => setPassword(e)}
-            // onEndEditing={() => console.log(textInput)}
           />
         </View>
         <GradientButton
@@ -101,7 +115,9 @@ const LoginScreen = (props) => {
           }}
         >
           <TouchableOpacity onPress={() => navigation.navigate("register")}>
-            <Text style={{ fontSize: 14, fontWeight: "bold" }}>Resgister</Text>
+            <Text style={{ fontSize: 14, fontWeight: "bold", color: "white" }}>
+              Sign up for you ?
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -111,7 +127,7 @@ const LoginScreen = (props) => {
 const myStyle = StyleSheet.create({
   view: {
     flex: 1,
-    // backgroundColor: "red",
+    backgroundColor: "#B22222",
   },
   viewContainer: {
     flex: 1,
@@ -124,9 +140,9 @@ const myStyle = StyleSheet.create({
     padding: 3,
     width: 320,
     height: 50,
-    borderColor: "black",
+    borderColor: "white",
     flexDirection: "row",
-    borderColor: "black",
+    borderColor: "white",
     borderWidth: 1,
     marginVertical: 5,
     marginHorizontal: 40,
@@ -134,7 +150,7 @@ const myStyle = StyleSheet.create({
   },
   inputStyle: {
     marginLeft: 20,
-    color: "#000000",
+    color: "white",
     fontSize: 22,
   },
   imageStyle: {

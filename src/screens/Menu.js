@@ -17,12 +17,18 @@ var height = Dimensions.get("window").height; //full heigh
 const Menu = (props) => {
   const navigation = useNavigation();
   const [userStorage, setUserStorage] = useState("");
+  const [id, setid] = useState(null);
   const readDataFromStorage = async () => {
     try {
-      const user = await AsyncStorage.getItem("user");
+      const user = await AsyncStorage.getItem("name");
+      const id = await AsyncStorage.getItem("id");
       if (user !== null) {
-        console.log(user);
         setUserStorage(user);
+        console.log(user);
+      }
+      if (id !== null) {
+        setid(id);
+        console.log(id);
       }
     } catch (e) {
       alert("Failed to fetch the data from storage");
@@ -30,7 +36,7 @@ const Menu = (props) => {
   };
   useEffect(() => {
     readDataFromStorage();
-  }, []);
+  }, [userStorage]);
   return (
     <View style={myStyle.container}>
       <View style={myStyle.viewContainer}>
@@ -69,9 +75,8 @@ const Menu = (props) => {
               }}
             >
               <Text style={{ fontSize: 28, color: "white" }}>
-                {`${userStorage
-                  .substring(0, 1)
-                  .toUpperCase()}${userStorage.substring(1, 2).toLowerCase()}`}
+                {userStorage.substring(0, 1).toUpperCase()}
+                {userStorage.substring(1, 2).toLowerCase()}
               </Text>
             </View>
           </View>
@@ -91,14 +96,23 @@ const Menu = (props) => {
         </View>
         <View style={{ flex: 0.65, padding: 3 }}>
           <View style={myStyle.boxRow}>
-            <View style={myStyle.box}>
-              <Text style={myStyle.textBox}>My Pokemon Desk</Text>
-              <Image
-                source={require(`../images/re.png`)}
-                style={myStyle.imageStyleBox}
-              />
-            </View>
-            <TouchableOpacity onPress={() => navigation.navigate("random")}>
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate("mypokemon", { id: id, name: userStorage })
+              }
+            >
+              <View style={myStyle.box}>
+                <Text style={myStyle.textBox}>My Pokemon Desk</Text>
+                <Image
+                  source={require(`../images/re.png`)}
+                  style={myStyle.imageStyleBox}
+                />
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => navigation.navigate("random", { id: id })}
+            >
               <View style={myStyle.box2}>
                 <Text style={myStyle.textBox}>Get Pokemon Per Day</Text>
 
@@ -111,22 +125,38 @@ const Menu = (props) => {
           </View>
 
           <View style={myStyle.boxRow}>
-            <View style={myStyle.box3}>
-              <Text style={myStyle.textBox}>Search Pokemon</Text>
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate("AllPokemon", { id: id, name: userStorage })
+              }
+            >
+              <View style={myStyle.box3}>
+                <Text style={myStyle.textBox}>Search Pokemon</Text>
 
-              <Image
-                source={require(`../images/search2.jpg`)}
-                style={myStyle.imageStyleBoxSearch}
-              />
-            </View>
-            <View style={myStyle.box4}>
-              <Text style={myStyle.textBox}>Fight Mode</Text>
+                <Image
+                  source={require(`../images/search2.jpg`)}
+                  style={myStyle.imageStyleBoxSearch}
+                />
+              </View>
+            </TouchableOpacity>
 
-              <Image
-                source={require(`../images/fight.png`)}
-                style={myStyle.imageStyleBoxFight}
-              />
-            </View>
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate("RandomFight", {
+                  idUser: id,
+                  name: userStorage,
+                })
+              }
+            >
+              <View style={myStyle.box4}>
+                <Text style={myStyle.textBox}>Fight Mode</Text>
+
+                <Image
+                  source={require(`../images/fight.png`)}
+                  style={myStyle.imageStyleBoxFight}
+                />
+              </View>
+            </TouchableOpacity>
           </View>
         </View>
       </View>
@@ -134,7 +164,7 @@ const Menu = (props) => {
   );
 };
 const myStyle = StyleSheet.create({
-  container: { flex: 1 },
+  container: { flex: 1, backgroundColor: "white" },
   viewContainer: { flex: 1 },
   imageStyle: {
     width: 260,
